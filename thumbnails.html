@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thumbnails & Images - Electrizied</title>
+    <style>
+        /* Global Reset, Theme & Page Load Animation */
+        :root {
+            --light-blue: #E0FFFF;
+            --dark-blue: #00008B;
+            --background: #000212;
+            --panel-bg: rgba(0, 5, 25, 0.7);
+            --button-glow: rgba(224, 255, 255, 0.4);
+            --title-glow: rgba(224, 255, 255, 0.5);
+            --transition-speed: 0.3s;
+        }
+
+        @keyframes fadeInPage {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes driftStars {
+            0% { background-position: 0 0, 40px 60px, -200px 10%; }
+            100% { background-position: 550px 550px, 390px 410px, 150px 360px; }
+        }
+
+        body {
+            background-color: var(--background);
+            color: #ddd;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            animation: fadeInPage 1s ease-out;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 1px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 1px),
+                radial-gradient(rgba(173, 216, 230, 0.1), transparent 40%);
+            background-size: 550px 550px, 350px 350px, 70% 70%;
+            z-index: -1;
+            opacity: 0.5;
+            animation: driftStars 120s linear infinite;
+        }
+
+        header {
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(0, 0, 18, 0.9);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .logo { font-size: 1.5em; font-weight: bold; color: #fff; text-transform: uppercase; letter-spacing: 2px; }
+        nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 20px; flex-wrap: wrap; }
+        nav a { text-decoration: none; color: #fff; text-transform: uppercase; font-weight: 500; font-size: 0.9em; transition: color var(--transition-speed); }
+        nav a:hover { color: var(--light-blue); }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 60px 20px; }
+
+        h2 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-align: center;
+            background: linear-gradient(90deg, var(--light-blue) 0%, var(--dark-blue) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(224, 255, 255, 0.3);
+        }
+
+        .page-subtitle { text-align: center; color: #aaa; margin-bottom: 50px; font-size: 1.2em; }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid rgba(224, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        /* Gallery Grid & Template Styles */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            border: 1px solid rgba(224, 255, 255, 0.1);
+            background-color: #000;
+            cursor: pointer;
+            transition: transform var(--transition-speed) ease, border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+
+        .gallery-item:hover, .gallery-item:focus {
+            transform: scale(1.03) translateY(-5px);
+            border-color: var(--light-blue);
+            box-shadow: 0 0 25px rgba(224, 255, 255, 0.3), 0 10px 30px rgba(0,0,0,0.6);
+            z-index: 10;
+        }
+
+        .thumbnail {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .gallery-item:hover .thumbnail { transform: scale(1.05); }
+
+        .gallery-caption {
+            background: rgba(0, 0, 5, 0.85);
+            color: #fff;
+            text-align: center;
+            padding: 12px 15px;
+            font-size: 1em;
+            font-weight: bold;
+            border-top: 1px solid rgba(224, 255, 255, 0.1);
+            transition: background var(--transition-speed), color var(--transition-speed);
+        }
+
+        .gallery-item:hover .gallery-caption {
+            background: var(--panel-bg);
+            color: var(--light-blue);
+        }
+
+        /* Fullscreen Modal */
+        .modal { display: none; position: fixed; z-index: 2000; padding-top: 50px; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 10, 0.95); backdrop-filter: blur(8px); cursor: pointer; }
+        .modal-content { margin: auto; display: block; max-width: 90%; max-height: 85vh; border-radius: 10px; border: 2px solid var(--light-blue); box-shadow: 0 0 40px rgba(224, 255, 255, 0.4); cursor: default; }
+        
+        @keyframes zoomInModal { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-content, #caption { animation: zoomInModal var(--transition-speed) ease-out; }
+        
+        #caption { margin: auto; display: block; width: 80%; max-width: 700px; text-align: center; color: var(--light-blue); font-weight: bold; padding: 20px 0; font-size: 1.4em; text-shadow: 0 0 10px var(--title-glow); }
+        .close-modal { position: absolute; top: 15px; right: 35px; color: #fff; font-size: 40px; font-weight: bold; transition: color var(--transition-speed), transform var(--transition-speed); cursor: pointer; z-index: 2001; }
+        .close-modal:hover { color: var(--light-blue); transform: scale(1.1); }
+
+        @media (max-width: 768px) {
+            header { flex-direction: column; gap: 15px; padding: 15px; }
+            nav ul { justify-content: center; }
+            .modal-content { max-width: 95%; margin-top: 30px; }
+            .close-modal { right: 15px; top: 10px; font-size: 35px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">Electrizied</div>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+            <li><a href="thumbnails.html" style="color:var(--light-blue);">Thumbnails</a></li>
+            <li><a href="experience.html">Experience</a></li>
+            <li><a href="info.html">Info</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main class="container">
+    <h2>Thumbnails & Art</h2>
+    <p class="page-subtitle">A collection of custom thumbnails, graphical designs, and renders. <br> <strong>(Click to view fullscreen)</strong></p>
+    
+    <div class="panel">
+        <div class="gallery-grid">
+
+            <div class="gallery-item" tabindex="0">
+                <img class="thumbnail" src="<IMAGE_LINK_HERE>" alt="Thumbnail 1">
+                <div class="gallery-caption"><TITLE_HERE></div>
+            </div>
+            <div class="gallery-item" tabindex="0">
+                <img class="thumbnail" src="<IMAGE_LINK_HERE>" alt="Thumbnail 2">
+                <div class="gallery-caption"><TITLE_HERE></div>
+            </div>
+            <div class="gallery-item" tabindex="0">
+                <img class="thumbnail" src="<IMAGE_LINK_HERE>" alt="Thumbnail 3">
+                <div class="gallery-caption"><TITLE_HERE></div>
+            </div>
+            </div>
+    </div>
+</main>
+
+<div id="imageModal" class="modal">
+    <span class="close-modal">&times;</span>
+    <img class="modal-content" id="img01">
+    <div id="caption"></div>
+</div>
+
+<script>
+    // Fullscreen Image Handling
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("img01");
+    const captionText = document.getElementById("caption");
+    const closeBtn = document.querySelector(".close-modal");
+
+    function openModal() {
+        modal.style.display = "block";
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeModal() {
+        modal.style.display = "none";
+        document.body.style.overflow = "auto";
+    }
+
+    document.querySelectorAll('.gallery-item').forEach(item => {
+        item.addEventListener('click', function(){
+            const img = this.querySelector('.thumbnail');
+            modalImg.src = img.src;
+            captionText.innerHTML = this.querySelector('.gallery-caption').innerHTML;
+            openModal();
+        });
+
+        item.addEventListener('keydown', function(e) {
+            if(e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                this.click();
+            }
+        });
+    });
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e) {
+        if(e.target === modal || e.target === closeBtn) closeModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if(e.key === "Escape" && modal.style.display === "block") closeModal();
+    });
+</script>
+
+</body>
+</html>
